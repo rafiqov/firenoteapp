@@ -1,8 +1,8 @@
 class Configurations {
-  static const apiKey = 'AIzaSyDm_i1xvtydvNc5PcJtSBgGrP0xJNcASDc';
+  static const apiKey = '';
   static const authDomain = "Your values";
-  static const projectId = 'fire-note-app-f263e';
+  static const projectId = '';
   static const storageBucket = "Your values";
-  static const messagingSenderId ='598890213186';
-  static const appId = "1:598890213186:android:4bd40a169a02300cac22db";
+  static const messagingSenderId ='';
+  static const appId = "";
 }
