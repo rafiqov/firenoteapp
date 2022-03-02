@@ -5,6 +5,7 @@ import 'package:firenoteapp/services/auth_service.dart';
 import 'package:firenoteapp/services/hive_service.dart';
 import 'package:firenoteapp/services/real_time_database_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import '../models/note_models.dart';
 import 'detail_page.dart';
 
@@ -160,13 +161,40 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget itemWidget(Note note) {
-    return ListTile(
-      onTap: () => _openDetailForEdit(note),
-      title: Text(note.title),
-      subtitle: Text(note.content),
-      trailing: IconButton(
-        onPressed: () => removeNote(note),
-        icon: const Icon(Icons.delete, color: Colors.red),
+    return Slidable(
+      startActionPane: ActionPane(
+        extentRatio: 0.3,
+        motion: const ScrollMotion(),
+        children:  [
+          SlidableAction(
+            onPressed: (context)=>removeNote(note),
+            backgroundColor: const Color(0xFFFE4A49),
+            foregroundColor: Colors.white,
+            icon: Icons.delete,
+            label: 'Delete',
+          ),
+
+        ],
+      ),
+      endActionPane:  ActionPane(
+        extentRatio: 0.3,
+        motion: const ScrollMotion(),
+        children: [
+          SlidableAction(
+            onPressed: (context)=> _openDetailForEdit(note),
+            backgroundColor: const Color(0xFF7BC043),
+            foregroundColor: Colors.white,
+            icon: Icons.edit,
+            label: 'Edit',
+          ),
+
+        ],
+      ),
+      child: ListTile(
+
+        title: Text(note.title),
+        subtitle: Text(note.content),
+
       ),
     );
   }
