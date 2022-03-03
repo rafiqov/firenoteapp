@@ -1,11 +1,13 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:firenoteapp/commons/drawer_widget.dart';
 
-import 'package:firenoteapp/pages/sign_in_page.dart';
-import 'package:firenoteapp/pages/sign_up_page.dart';
-import 'package:firenoteapp/services/auth_service.dart';
+import 'package:firenoteapp/commons/loading_widget.dart';
 import 'package:firenoteapp/services/hive_service.dart';
 import 'package:firenoteapp/services/real_time_database_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import '../commons/lottie_common.dart';
 import '../models/note_models.dart';
 import 'detail_page.dart';
 
@@ -22,27 +24,12 @@ class _HomePageState extends State<HomePage> {
   bool isLoading = false;
   List<Note> notes = [];
 
-  void _openSignIn() {
-    HiveDB.removeUser();
-    Navigator.pushReplacementNamed(context, SignInPage.id);
-  }
-
-  void showSnackBar({required String text}) {
-    final snackBar = SnackBar(
-      content: Text(text),
-    );
-    setState(() => isLoading = false);
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-  }
-
   void getData() async {
     setState(() => isLoading = true);
     String userId = HiveDB.loadUser();
     notes = await RealTimeDataBase.getPosts(userId);
     setState(() => isLoading = false);
   }
-
-  void _openSignUp() => Navigator.pushReplacementNamed(context, SignUpPage.id);
 
   void _openDetailPage() async {
     var res = await Navigator.pushNamed(context, DetailPage.id);
@@ -76,8 +63,6 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void changeMode() => setState(() => HiveDB.storeMode(!HiveDB.loadMode()));
-
   @override
   void initState() {
     getData();
@@ -88,14 +73,17 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: appbar(),
-      body: isLoading
-          ? const Center(
-              child: CircularProgressIndicator(backgroundColor: Colors.red))
-          : ListView.builder(
+      drawer: const DrawerWidget(),
+      body: Stack(
+        children: [
+          ListView.builder(
               itemCount: notes.length,
               itemBuilder: (context, index) {
                 return itemWidget(notes[index]);
               }),
+          LoadingWidget(isLoading: isLoading)
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _openDetailPage,
         child: const Icon(Icons.add),
@@ -107,94 +95,80 @@ class _HomePageState extends State<HomePage> {
     return AppBar(
       elevation: 0,
       backgroundColor: Theme.of(context).primaryColor,
-      title: const Text(
-        "Home",
-        style: TextStyle(color: Colors.white),
-      ),
-      actions: [
-        // #language_picker
-        Container(
-          margin: const EdgeInsets.symmetric(vertical: 12),
-          padding: const EdgeInsets.symmetric(horizontal: 5),
-          decoration: BoxDecoration(
-              color: Theme.of(context).backgroundColor,
-              borderRadius: BorderRadius.circular(10)),
-          alignment: Alignment.center,
-          child: DropdownButton<String>(
-            alignment: Alignment.centerRight,
-            underline: Container(),
-            isDense: true,
-            value: 'Menu',
-            items: <String>[
-              'Menu',
-              'Log Out',
-              'Delete',
-              'Add',
-            ].map<DropdownMenuItem<String>>((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Center(child: Text(value)),
-              );
-            }).toList(),
-            onChanged: (String? value) async {
-              if (value == 'Log Out') {
-                _openSignIn();
-              } else if (value == 'Delete') {
-                AuthService.removeUser(context);
-                showSnackBar(text: "Remove user");
-              } else if (value == 'Add') {
-                showSnackBar(text: "Add user");
-                _openSignUp();
-              }
-            },
-          ),
-        ),
-        const SizedBox(
-          width: 10,
-        ),
-        MaterialButton(
-          onPressed: changeMode,
-          child: Icon(HiveDB.loadMode() ? Icons.dark_mode : Icons.light_mode),
-        )
-      ],
+      title: Text("home".tr()),
     );
   }
 
   Widget itemWidget(Note note) {
-    return Slidable(
-      startActionPane: ActionPane(
-        extentRatio: 0.3,
-        motion: const ScrollMotion(),
-        children:  [
-          SlidableAction(
-            onPressed: (context)=>removeNote(note),
-            backgroundColor: const Color(0xFFFE4A49),
-            foregroundColor: Colors.white,
-            icon: Icons.delete,
-            label: 'Delete',
+    return Column(
+      children: [
+        Slidable(
+          startActionPane: ActionPane(
+            extentRatio: 0.3,
+            motion: const ScrollMotion(),
+            children: [
+              SlidableAction(
+                onPressed: (context) => removeNote(note),
+                backgroundColor: const Color(0xFFFE4A49),
+                foregroundColor: Colors.white,
+                icon: Icons.delete,
+                label: 'delete'.tr(),
+              ),
+            ],
           ),
-
-        ],
-      ),
-      endActionPane:  ActionPane(
-        extentRatio: 0.3,
-        motion: const ScrollMotion(),
-        children: [
-          SlidableAction(
-            onPressed: (context)=> _openDetailForEdit(note),
-            backgroundColor: const Color(0xFF7BC043),
-            foregroundColor: Colors.white,
-            icon: Icons.edit,
-            label: 'Edit',
+          endActionPane: ActionPane(
+            extentRatio: 0.3,
+            motion: const ScrollMotion(),
+            children: [
+              SlidableAction(
+                onPressed: (context) => _openDetailForEdit(note),
+                backgroundColor: const Color(0xFF7BC043),
+                foregroundColor: Colors.white,
+                icon: Icons.edit,
+                label: 'edit'.tr(),
+              ),
+            ],
           ),
+          child: ListTile(
+            tileColor:
+                HiveDB.loadMode() ? Colors.grey.shade700 : Colors.grey.shade200,
+            minLeadingWidth: 60,
+            leading: imageViewWidget(imageUrl: note.imgUrl),
+            title: Text(note.title),
+            subtitle: Text(note.content),
+          ),
+        ),
+        Divider(
+            height: 1,
+            color: HiveDB.loadMode() ? Colors.white : Colors.black,
+            thickness: 1)
+      ],
+    );
+  }
 
-        ],
-      ),
-      child: ListTile(
-
-        title: Text(note.title),
-        subtitle: Text(note.content),
-
+  Widget imageViewWidget({String? imageUrl}) {
+    double size = 50;
+    String url =
+        'https://avatars.mds.yandex.net/i?id=984180c9735fa1a9f95a5fa62f4717bd-5885656-images-thumbs&n=13';
+    return CircleAvatar(
+      radius: size / 2,
+      child: CachedNetworkImage(
+        height: size,
+        imageBuilder: (context, imageProvider) => Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(size / 2),
+            image: DecorationImage(
+                image: imageProvider,
+                fit: BoxFit.cover,
+                colorFilter:
+                    const ColorFilter.mode(Colors.grey, BlendMode.colorBurn)),
+          ),
+        ),
+        imageUrl: imageUrl ?? url,
+        progressIndicatorBuilder: (context, url, downloadProgress) =>
+            CircularProgressIndicator(value: downloadProgress.progress),
+        errorWidget: (context, url, error) =>
+            LottieCommon(lottieEnum: LottieEnum.error, size: size),
       ),
     );
   }

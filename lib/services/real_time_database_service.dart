@@ -5,8 +5,9 @@ import '../models/note_models.dart';
 class RealTimeDataBase {
   static final _database = FirebaseDatabase.instance.ref();
 
-  static Future<void> addPost(Note note) async {
+  static Future<Stream<DatabaseEvent>> addPost(Note note) async {
     _database.child("posts").push().set(note.toJson());
+    return _database.onChildAdded;
   }
 
   static Future<List<Note>> getPosts(String id) async {
@@ -24,6 +25,7 @@ class RealTimeDataBase {
   static Future<void> updatePost(Note note) async {
     final Map<String, Map> updates = {};
     updates['/posts/${note.key}'] = note.toJson();
+
     return await _database.update(updates);
   }
 

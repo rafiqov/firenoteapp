@@ -1,8 +1,14 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firenoteapp/commons/functions_common.dart';
+import 'package:firenoteapp/commons/loading_widget.dart';
 import 'package:firenoteapp/pages/sign_in_page.dart';
 import 'package:firenoteapp/services/auth_service.dart';
 import 'package:flutter/material.dart';
 
+import '../commons/main_button.dart';
+import '../commons/text_field_common_widget.dart';
+import '../commons/text_with_link.dart';
 import '../services/hive_service.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -31,7 +37,7 @@ class _SignUpPageState extends State<SignUpPage> {
         email.isEmpty ||
         lastName.isEmpty ||
         password.isEmpty) {
-      showSnackBar(text: 'Wrong something');
+      FunctionCommon.showSnackBar(text: 'Wrong something', context: context);
       return;
     }
     setState(() => isLoading = true);
@@ -45,17 +51,11 @@ class _SignUpPageState extends State<SignUpPage> {
       HiveDB.storeUser(user);
       _openSignIn();
     } else {
-      showSnackBar(text: AuthService.snackBar!);
+      FunctionCommon.showSnackBar(text: AuthService.snackBar!, context: context);
+      setState(() => isLoading = false);
     }
   }
 
-  void showSnackBar({required String text}) {
-    final snackBar = SnackBar(
-      content: Text(text),
-    );
-    setState(() => isLoading = false);
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-  }
 
   void _openSignIn() => Navigator.pushReplacementNamed(context, SignInPage.id);
 
@@ -63,84 +63,49 @@ class _SignUpPageState extends State<SignUpPage> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-
         body: Stack(
           children: [
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-
-                textFile(name: " First Name", controller: _firstNameController),
+                TextFieldWidget(
+                    name: "firstname".tr(), controller: _firstNameController),
                 const SizedBox(height: 10),
-                textFile(name: " Email", controller: _emailController),
+                TextFieldWidget(name: "email".tr(), controller: _emailController),
                 const SizedBox(height: 10),
-                textFile(name: " Last Name", controller: _lastNameController),
+                TextFieldWidget(
+                    name: "lastname".tr(), controller: _lastNameController),
                 const SizedBox(height: 10),
-                textFile(name: " Password", controller: _passwordController),
+                TextFieldWidget(
+                    name: "password".tr(), controller: _passwordController),
                 const SizedBox(height: 10),
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 50),
-                  height: 50,
-                  child: MaterialButton(
-                    onPressed: doSignUp,
-                    minWidth: 150,
-                    child: const Text('Sign Up'),
-                    shape: const StadiumBorder(),
-                    color: Colors.blue,
-                  ),
+                MainButton(
+                  name: 'sign_up'.tr(),
+                  function: doSignUp,
                 ),
                 const SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    textWithLink(
-                        text: 'Do have an account?',
+                    TextWithLinkWidget(
+                        text: "have_account".tr(),
                         fontWeight: FontWeight.bold),
                     const SizedBox(width: 10),
-                    textWithLink(
-                        text: 'Sign In',
-                        color: Colors.blue,
+                    TextWithLinkWidget(
+                        text: 'sign_in'.tr(),
+                        color: HiveDB.loadMode() ? Colors.blueGrey : Colors.blue,
                         function: _openSignIn),
                   ],
                 )
               ],
             ),
-            isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : const SizedBox.shrink()
+            LoadingWidget(isLoading: isLoading)
           ],
         ),
       ),
     );
   }
 
-  Widget textFile({required String name, controller}) {
-    return Container(
-      width: 150,
-      height: 50,
-      margin: const EdgeInsets.symmetric(horizontal: 50),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: TextField(
-        controller: controller,
-        decoration: InputDecoration(border: InputBorder.none, hintText: name),
-      ),
-    );
-  }
-
-  Widget textWithLink(
-      {required String text,
-      function,
-      Color color = Colors.black,
-      FontWeight fontWeight = FontWeight.normal}) {
-    return InkWell(
-      onTap: function,
-      child: Text(text,
-          textAlign: TextAlign.center,
-          style: TextStyle(color: color, fontWeight: fontWeight)),
-    );
-  }
 }
+

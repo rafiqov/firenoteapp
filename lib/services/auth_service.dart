@@ -5,13 +5,14 @@ import 'package:flutter/material.dart';
 
 class AuthService {
   static String? snackBar;
-  static FirebaseAuth _auth = FirebaseAuth.instance;
+  static FirebaseAuth auth = FirebaseAuth.instance;
 
   static Future<User?> signUpUser(
       String name, String email, String password) async {
     try {
-      UserCredential userCredential = await _auth
-          .createUserWithEmailAndPassword(email: email, password: password);
+      UserCredential userCredential = await auth.createUserWithEmailAndPassword(
+          email: email, password: password);
+      await userCredential.user!.updateDisplayName(name);
       User? user = userCredential.user;
 
       return user;
@@ -22,7 +23,6 @@ class AuthService {
         snackBar = 'The account already exists for that email.';
       }
     } catch (e) {
-
       snackBar = e.toString();
     }
     return null;
@@ -30,7 +30,7 @@ class AuthService {
 
   static Future<User?> signInUser(String email, String password) async {
     try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+      UserCredential userCredential = await auth.signInWithEmailAndPassword(
           email: email, password: password);
       User? user = userCredential.user;
 
@@ -43,24 +43,22 @@ class AuthService {
       }
     }
 
-
     return null;
   }
 
-
-  static Future <void>  signOutUser(BuildContext context) async {
-    await _auth.signOut();
+  static Future<void> signOutUser(BuildContext context) async {
+    await auth.signOut();
     Navigator.pushReplacementNamed(context, SignInPage.id);
   }
 
-
-  static Future <void> removeUser(BuildContext context) async{
+  static Future<void> removeUser(BuildContext context) async {
     try {
-      await _auth.currentUser!.delete();
+      await auth.currentUser!.delete();
       Navigator.pushReplacementNamed(context, SignUpPage.id);
     } on FirebaseAuthException catch (e) {
       if (e.code == 'requires-recent-login') {
-        snackBar = 'The user must reauthenticate before this operation can be executed.';
+        snackBar =
+            'The user must reauthenticate before this operation can be executed.';
       }
     }
   }
