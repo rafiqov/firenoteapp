@@ -91,7 +91,8 @@ class HomeController extends GetxController {
   }
 
   void changeLang(bool value) {
-    LangService.changeLocale(value ? 'en' : "ru");
+    isEng = !isEng;
+    LangService.changeLocale(value ? LangService.langs[0] : LangService.langs[1]);
     update();
   }
 }

@@ -2,4 +2,4 @@
 
 ## GetX
 
-## Firebase auth, Firebase real time db
+## Firebase auth, Firebase real time db, Hive

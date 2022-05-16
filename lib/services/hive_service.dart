@@ -16,7 +16,7 @@ class HiveDB {
   // // #language
   static void storeLang(String lang) async => box.put('lang', lang);
 
-  static String loadLang() => box.get('lang');
+  static String loadLang() => box.get('lang', defaultValue: 'en');
 
   // #mode
   static void storeMode(bool isMode) async => box.put('isMode', isMode);
