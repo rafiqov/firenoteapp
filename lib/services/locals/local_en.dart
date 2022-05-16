@@ -1,4 +1,4 @@
-{
+Map <String, String> enEN = {
   "email": "Email",
   "password": "Password",
   "lastname": "Lastname",
@@ -23,4 +23,4 @@
   "change_mode": "Change Mode",
   "change_lang": "Change language",
   "source": "Is Gallery:"
-}
+};

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 class LoadingWidget extends StatelessWidget {
-  bool isLoading;
+  final bool isLoading;
 
-  LoadingWidget( {Key? key, this.isLoading = false}) : super(key: key);
+  const LoadingWidget( {Key? key, this.isLoading = false}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

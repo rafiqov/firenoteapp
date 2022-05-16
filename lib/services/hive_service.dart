@@ -3,8 +3,8 @@ import 'package:hive/hive.dart';
 
 
 class HiveDB {
-  static const String DB_NAME = 'flutter_bin';
-  static var box = Hive.box(DB_NAME);
+  static const String dbName = 'flutter_bin';
+  static var box = Hive.box(dbName);
 
   // #user
   static void storeUser(User user) async => box.put('user', user.uid);

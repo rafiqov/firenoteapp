@@ -1,38 +1,21 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firenoteapp/pages/detail_page.dart';
-import 'package:firenoteapp/pages/home_page.dart';
-import 'package:firenoteapp/pages/sign_in_page.dart';
-import 'package:firenoteapp/pages/sign_up_page.dart';
+import 'package:firenoteapp/pages/auth/sign_in/sign_in_page.dart';
+import 'package:firenoteapp/pages/auth/sign_up/sign_up_page.dart';
+import 'package:firenoteapp/pages/detail/detail_page.dart';
+import 'package:firenoteapp/pages/home/home_page.dart';
 import 'package:firenoteapp/services/auth_service.dart';
-import 'package:firenoteapp/services/configuration_services.dart';
 import 'package:firenoteapp/services/hive_service.dart';
+import 'package:firenoteapp/services/init_service.dart';
+import 'package:firenoteapp/services/lang_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
+import 'package:get/get.dart';
 import 'package:hive_flutter/adapters.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await EasyLocalization.ensureInitialized();
-  await Hive.initFlutter();
-  await Hive.openBox(HiveDB.DB_NAME);
-  await Firebase.initializeApp(
-    options: const FirebaseOptions(
-        apiKey: Configurations.apiKey,
-        storageBucket: Configurations.storageBucket,
-        appId: Configurations.appId,
-        messagingSenderId: Configurations.messagingSenderId,
-        projectId: Configurations.projectId),
-
-  );
-  runApp(EasyLocalization(
-      supportedLocales: const [Locale('en', 'US'), Locale('uz', 'UZ')],
-      path: 'assets/translations',
-      fallbackLocale: const Locale('en', 'US'),
-      child: const MyApp()
-  ),);
+  await InitService.init();
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -62,10 +45,10 @@ class MyApp extends StatelessWidget {
     return ValueListenableBuilder(
         valueListenable: HiveDB.box.listenable(),
         builder: (BuildContext context, box, Widget? child) {
-          return MaterialApp(
-            localizationsDelegates: context.localizationDelegates,
-            supportedLocales: context.supportedLocales,
-            locale: context.locale,
+          return GetMaterialApp(
+            translations: LangService(),
+            locale: LangService.locale,
+            fallbackLocale: LangService.fallbackLocale,
             debugShowCheckedModeBanner: false,
             title: 'Fire Note App',
             themeMode: HiveDB.loadMode() ? ThemeMode.dark : ThemeMode.light,

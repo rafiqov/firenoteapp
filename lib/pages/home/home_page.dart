@@ -1,105 +1,63 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:easy_localization/easy_localization.dart';
-import 'package:firenoteapp/commons/drawer_widget.dart';
-
-import 'package:firenoteapp/commons/loading_widget.dart';
+import 'package:firenoteapp/pages/home/home_controller.dart';
 import 'package:firenoteapp/services/hive_service.dart';
-import 'package:firenoteapp/services/real_time_database_service.dart';
+import 'package:firenoteapp/views/drawer_widget.dart';
+import 'package:firenoteapp/views/loading_widget.dart';
+import 'package:firenoteapp/views/lottie_common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import '../commons/lottie_common.dart';
-import '../models/note_models.dart';
-import 'detail_page.dart';
+import 'package:get/get.dart';
 
-class HomePage extends StatefulWidget {
+import '../../models/note_models.dart';
+
+class HomePage extends StatelessWidget {
   static const String id = 'home_page';
 
   const HomePage({Key? key}) : super(key: key);
 
   @override
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  bool isLoading = false;
-  List<Note> notes = [];
-
-  void getData() async {
-    setState(() => isLoading = true);
-    String userId = HiveDB.loadUser();
-    notes = await RealTimeDataBase.getPosts(userId);
-    setState(() => isLoading = false);
-  }
-
-  void _openDetailPage() async {
-    var res = await Navigator.pushNamed(context, DetailPage.id);
-    if (res as bool) {
-      setState(() => isLoading = true);
-      String userId = HiveDB.loadUser();
-      notes = await RealTimeDataBase.getPosts(userId);
-      setState(() => isLoading = false);
-    }
-  }
-
-  void removeNote(Note note) async {
-    setState(() => isLoading = true);
-    await RealTimeDataBase.deletePost(note);
-    String userId = HiveDB.loadUser();
-    notes = await RealTimeDataBase.getPosts(userId);
-    setState(() => isLoading = false);
-  }
-
-  void _openDetailForEdit(Note note) async {
-    var result = await Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => DetailPage(
-                  note: note,
-                )));
-    if (result != null && result == true) {
-      String userId = HiveDB.loadUser();
-      notes = await RealTimeDataBase.getPosts(userId);
-      setState(() => isLoading = false);
-    }
-  }
-
-  @override
-  void initState() {
-    getData();
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: appbar(),
-      drawer: const DrawerWidget(),
-      body: Stack(
-        children: [
-          ListView.builder(
-              itemCount: notes.length,
-              itemBuilder: (context, index) {
-                return itemWidget(notes[index]);
-              }),
-          LoadingWidget(isLoading: isLoading)
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _openDetailPage,
-        child: const Icon(Icons.add),
-      ),
-    );
+    return GetBuilder<HomeController>(
+        init: HomeController(),
+        builder: (controller) {
+          return Scaffold(
+            appBar: appbar(),
+            drawer: const DrawerWidget(),
+            body: RefreshIndicator(
+              triggerMode: RefreshIndicatorTriggerMode.anywhere,
+              color: Colors.white,
+              backgroundColor:
+                  HiveDB.loadMode() ? Colors.black : Colors.blue.shade600,
+              onRefresh: () async => controller.getData(),
+              child: Stack(
+                children: [
+                  ListView.builder(
+                      itemCount: controller.notes.length,
+                      itemBuilder: (context, index) {
+                        return itemWidget(controller.notes[index], controller);
+                      }),
+                  LoadingWidget(isLoading: controller.isLoading)
+                ],
+              ),
+            ),
+            floatingActionButton: FloatingActionButton(
+              onPressed: controller.openDetailPage,
+              child: const Icon(Icons.add),
+            ),
+          );
+        });
   }
 
   AppBar appbar() {
     return AppBar(
       elevation: 0,
-      backgroundColor: Theme.of(context).primaryColor,
-      title: Text("home".tr()),
+      backgroundColor: Get.theme.primaryColor,
+      title: Text("home".tr),
+      centerTitle: true,
     );
   }
 
-  Widget itemWidget(Note note) {
+  Widget itemWidget(Note note, HomeController controller) {
     return Column(
       children: [
         Slidable(
@@ -108,11 +66,11 @@ class _HomePageState extends State<HomePage> {
             motion: const ScrollMotion(),
             children: [
               SlidableAction(
-                onPressed: (context) => removeNote(note),
+                onPressed: (context) => controller.removeNote(note),
                 backgroundColor: const Color(0xFFFE4A49),
                 foregroundColor: Colors.white,
                 icon: Icons.delete,
-                label: 'delete'.tr(),
+                label: 'delete'.tr,
               ),
             ],
           ),
@@ -121,11 +79,11 @@ class _HomePageState extends State<HomePage> {
             motion: const ScrollMotion(),
             children: [
               SlidableAction(
-                onPressed: (context) => _openDetailForEdit(note),
+                onPressed: (context) => controller.openDetailForEdit(note),
                 backgroundColor: const Color(0xFF7BC043),
                 foregroundColor: Colors.white,
                 icon: Icons.edit,
-                label: 'edit'.tr(),
+                label: 'edit'.tr,
               ),
             ],
           ),

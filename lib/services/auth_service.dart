@@ -1,7 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firenoteapp/pages/sign_in_page.dart';
-import 'package:firenoteapp/pages/sign_up_page.dart';
-import 'package:flutter/material.dart';
 
 class AuthService {
   static String? snackBar;
@@ -46,15 +43,11 @@ class AuthService {
     return null;
   }
 
-  static Future<void> signOutUser(BuildContext context) async {
-    await auth.signOut();
-    Navigator.pushReplacementNamed(context, SignInPage.id);
-  }
+  static Future<void> signOutUser() async => await auth.signOut();
 
-  static Future<void> removeUser(BuildContext context) async {
+  static Future<void> removeUser() async {
     try {
       await auth.currentUser!.delete();
-      Navigator.pushReplacementNamed(context, SignUpPage.id);
     } on FirebaseAuthException catch (e) {
       if (e.code == 'requires-recent-login') {
         snackBar =

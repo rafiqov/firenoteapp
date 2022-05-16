@@ -2,10 +2,10 @@ import 'package:firenoteapp/services/hive_service.dart';
 import 'package:flutter/material.dart';
 
 class MainButton extends StatelessWidget {
-  Function? function;
-  String name;
+  final Function? function;
+  final String name;
 
-  MainButton({
+  const MainButton({
     required this.name,
     this.function,
     Key? key,

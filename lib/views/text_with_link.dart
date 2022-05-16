@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 class TextWithLinkWidget extends StatelessWidget {
-  String text;
-  Function? function;
-  Color? color;
-  FontWeight fontWeight;
+  final String text;
+  final Function? function;
+  final Color? color;
+  final FontWeight fontWeight;
 
-  TextWithLinkWidget(
+  const TextWithLinkWidget(
       {required this.text,
       this.function,
       this.color,

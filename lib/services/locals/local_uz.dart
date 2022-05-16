@@ -1,4 +1,4 @@
-{
+Map<String, String> uzUZ = {
   "email": "Pochta",
   "password": "Xavfsiz so'z",
   "lastname": "Sharif",
@@ -23,4 +23,4 @@
   "change_mode": "Rejimni o'zgartirish",
   "change_lang": "Tilni o'zgartirish",
   "source": "Galleriyadanmi? "
-}
+};
